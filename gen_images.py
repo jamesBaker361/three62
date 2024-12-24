@@ -1,0 +1,1 @@
+#this blender script will generate images from random camera angle and then save them along with the projection matrix

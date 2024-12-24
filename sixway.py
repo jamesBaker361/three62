@@ -1,0 +1,1 @@
+#this blender script will get the 6 possible positions and save them for each object

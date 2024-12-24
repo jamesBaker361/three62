@@ -1,0 +1,4 @@
+0) Augmented reality with diffusion  models deep dive
+1) get the 6 images for each model
+2) for each model generate images w the model with projection matrix (with/without occlusions)
+3) use consistency models for fast rendering
