@@ -8,6 +8,11 @@ import os
 
 camera,scene=get_camera_and_scene()
 
+render = bpy.context.scene.render
+render.resolution_x = 1024  # Width
+render.resolution_y = 1024  # Height
+render.resolution_percentage = 100  # Scale (100% means full resolution)
+
 def rescale_to_unit_box(obj,target_height=1.0):
     # Make sure the object is selected and active
     bpy.context.view_layer.objects.active = obj
@@ -41,7 +46,14 @@ def rescale_to_unit_box(obj,target_height=1.0):
 
 
 #standardized camera positions and angles
-position_angle_list=[]
+position_angle_list=[
+    [(0,-1,0),(90,0,0)], 
+    [(0,1,0),(-90,0,0)],
+    [(1,0,0),(0,90,0)],
+    [(-1,0,0),(0,-90,0)],
+    [(0,0,1),(0,0,0)],
+    [(0,0,-1),(-180,0,0)]
+]
 
 #character/object collection
 
@@ -58,24 +70,55 @@ def get_collection(collection_name:str):
 
     return new_collection
 
+def make_collection_invisible_in_render(collection_name):
+    # Get the collection
+    collection = bpy.data.collections.get(collection_name)
+    if not collection:
+        print(f"Collection '{collection_name}' not found!")
+        return
+    
+    # Iterate through all objects in the collection
+    for obj in collection.all_objects:
+        obj.hide_render = True  # Disable rendering for the object
+    
+    print(f"Collection '{collection_name}' is now invisible in renders.")
+
+def make_collection_visible_in_render(collection_name):
+    # Get the collection
+    collection = bpy.data.collections.get(collection_name)
+    if not collection:
+        print(f"Collection '{collection_name}' not found!")
+        return
+    
+    # Iterate through all objects in the collection
+    for obj in collection.all_objects:
+        obj.hide_render = False  # Enable rendering for the object
+    
+    print(f"Collection '{collection_name}' is now visible in renders.")
+
 collection_name="characters"
 
 collection=get_collection(collection_name)
 
 script_directory="\\Users\\jlbak\\three62"
 
-character_list=[]
+
+character_dict={}
+for character in character_dict.keys():
+    make_collection_invisible_in_render(character)
+
 character_images_folder=os.path.join(script_directory,"character_images")
 os.makedirs(character_images_folder,exist_ok=True)
-for character in character_list:
-    if character not in bpy.data.objects:
+for character,radius in character_dict.items():
+    make_collection_visible_in_render(character)
+    '''if character not in bpy.data.objects:
         obj_filepath=os.path.join(script_directory, "characters",character, f"{character}.obj")
         if os.path.exists(obj_filepath):
             bpy.ops.wm.obj_import(filepath=obj_filepath)
-    character_obj=bpy.data.objects[character]
-    rescale_to_unit_box(character_obj)
+    character_obj=bpy.data.objects[character]'''
+    #rescale_to_unit_box(character_obj)
     for i,(position,angle) in enumerate(position_angle_list):
-        camera.position=position
+        camera.position=radius * position
         camera.rotation_euler=angle
         file_name=f"{character}_{i}.png"
         bpy.context.scene.render.filepath = os.path.join(character_images_folder, file_name)
@@ -85,5 +128,6 @@ for character in character_list:
 
         # Render and save the screenshot from the camera's perspective
         bpy.ops.render.render(write_still=True)
+    make_collection_invisible_in_render(character)
         
         
