@@ -65,6 +65,8 @@ collection=get_collection(collection_name)
 script_directory="\\Users\\jlbak\\three62"
 
 character_list=[]
+character_images_folder=os.path.join(script_directory,"character_images")
+os.makedirs(character_images_folder,exist_ok=True)
 for character in character_list:
     if character not in bpy.data.objects:
         obj_filepath=os.path.join(script_directory, "characters",character, f"{character}.obj")
@@ -75,5 +77,13 @@ for character in character_list:
     for i,(position,angle) in enumerate(position_angle_list):
         camera.position=position
         camera.rotation_euler=angle
+        file_name=f"{character}_{i}.png"
+        bpy.context.scene.render.filepath = os.path.join(character_images_folder, file_name)
+        
+        bpy.context.scene.render.image_settings.file_format = 'PNG'
+        
+
+        # Render and save the screenshot from the camera's perspective
+        bpy.ops.render.render(write_still=True)
         
         
