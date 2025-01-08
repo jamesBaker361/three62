@@ -81,51 +81,6 @@ position_angle_list=[
     [(0,0,-1),(-180,0,0)]
 ]
 
-#character/object collection
-
-def get_collection(collection_name:str):
-    if collection_name in bpy.data.collections:
-        # Set new_collection to the existing collection
-        new_collection = bpy.data.collections[collection_name]
-        print(f"Collection '{collection_name}' already exists.")
-    else:
-        # Create a new collection
-        new_collection = bpy.data.collections.new(collection_name)
-        bpy.context.scene.collection.children.link(new_collection)
-        print(f"Collection '{collection_name}' created.")
-
-    return new_collection
-
-def make_collection_invisible_in_render(collection_name):
-    # Get the collection
-    collection = bpy.data.collections.get(collection_name)
-    if not collection:
-        print(f"Collection '{collection_name}' not found!")
-        return
-    
-    # Iterate through all objects in the collection
-    for obj in collection.all_objects:
-        obj.hide_render = True  # Disable rendering for the object
-    
-    print(f"Collection '{collection_name}' is now invisible in renders.")
-
-def make_collection_visible_in_render(collection_name):
-    # Get the collection
-    collection = bpy.data.collections.get(collection_name)
-    if not collection:
-        print(f"Collection '{collection_name}' not found!")
-        return
-    
-    # Iterate through all objects in the collection
-    for obj in collection.all_objects:
-        obj.hide_render = False  # Enable rendering for the object
-    
-    print(f"Collection '{collection_name}' is now visible in renders.")
-
-collection_name="characters"
-
-collection=get_collection(collection_name)
-
 
 
 
