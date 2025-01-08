@@ -1,12 +1,16 @@
 import bpy
 from mathutils import Vector
-from helpers import get_camera_and_scene
 import os
+import sys
+script_directory="\\Users\\jlbak\\three62"
+sys.path.append(script_directory)
+from helpers import get_camera_and_scene
+from math import radians
 #this blender script will get the 6 possible positions and save them for each object
 
 #rescale object
 
-camera,scene=get_camera_and_scene()
+camera=bpy.context.scene.camera
 
 render = bpy.context.scene.render
 render.resolution_x = 1024  # Width
@@ -45,12 +49,34 @@ def rescale_to_unit_box(obj,target_height=1.0):
     print(f"scale factor is {scale_factor}")
 
 
+def hide_collection_from_render(collection_name):
+    # Get the collection
+    collection = bpy.data.collections.get(collection_name)
+    if not collection:
+        print(f"Collection '{collection_name}' not found!")
+        return
+    
+    # Disable rendering for the entire collection
+    collection.hide_render = True
+    print(f"Collection '{collection_name}' is now hidden from renders.")
+
+def show_collection_from_render(collection_name):
+    # Get the collection
+    collection = bpy.data.collections.get(collection_name)
+    if not collection:
+        print(f"Collection '{collection_name}' not found!")
+        return
+    
+    # Disable rendering for the entire collection
+    collection.hide_render = False
+    print(f"Collection '{collection_name}' is now hidden from renders.")
+
 #standardized camera positions and angles
 position_angle_list=[
     [(0,-1,0),(90,0,0)], 
-    [(0,1,0),(-90,0,0)],
-    [(1,0,0),(0,90,0)],
-    [(-1,0,0),(0,-90,0)],
+    [(0,1,0),(90,0,180)],
+    [(1,0,0),(90,0,90)],
+    [(-1,0,0),(90,0,-90)],
     [(0,0,1),(0,0,0)],
     [(0,0,-1),(-180,0,0)]
 ]
@@ -100,26 +126,25 @@ collection_name="characters"
 
 collection=get_collection(collection_name)
 
-script_directory="\\Users\\jlbak\\three62"
 
 
-character_dict={}
+
+character_dict={"FuneralCarriage":6.5,
+                "AngoraCat":0.75,
+                "Brick":0.75}
+
 for character in character_dict.keys():
-    make_collection_invisible_in_render(character)
+    hide_collection_from_render(character)
+
 
 character_images_folder=os.path.join(script_directory,"character_images")
 os.makedirs(character_images_folder,exist_ok=True)
 for character,radius in character_dict.items():
-    make_collection_visible_in_render(character)
-    '''if character not in bpy.data.objects:
-        obj_filepath=os.path.join(script_directory, "characters",character, f"{character}.obj")
-        if os.path.exists(obj_filepath):
-            bpy.ops.wm.obj_import(filepath=obj_filepath)
-    character_obj=bpy.data.objects[character]'''
-    #rescale_to_unit_box(character_obj)
+    show_collection_from_render(character)
     for i,(position,angle) in enumerate(position_angle_list):
-        camera.position=radius * position
-        camera.rotation_euler=angle
+        location=[radius *p for p in position]
+        camera.location=location
+        camera.rotation_euler=[radians(a) for a in angle]
         file_name=f"{character}_{i}.png"
         bpy.context.scene.render.filepath = os.path.join(character_images_folder, file_name)
         
@@ -128,6 +153,4 @@ for character,radius in character_dict.items():
 
         # Render and save the screenshot from the camera's perspective
         bpy.ops.render.render(write_still=True)
-    make_collection_invisible_in_render(character)
-        
-        
+    hide_collection_from_render(character)   
